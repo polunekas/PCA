@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>PCA</title>
+
+    <script src="https://mlweb.loria.fr/lalolib.js"></script>
+    <!-- <script src="./pca.js"></script> -->
+
+    <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script>
+    <script>
+      //This first block computes each variable's average
+      let X = [
+        [1, 2, 4],
+        [4, 1, 2],
+        [5, 4, 8],
+      ];
+
+      let nvariables = 3; //строки
+      let nobjects = 3; //столбцы
+
+      let averages = [];
+      for (i = 0; i < nvariables; i++) {
+        var tmp2 = 0;
+        for (j = 0; j < nobjects; j++) {
+          tmp2 = tmp2 + X[i][j];
+        }
+        averages.push(tmp2 / nobjects);
+      }
+      //This block subtracts each reading by the average of the corresponding variable
+      for (i = 0; i < nvariables; i++) {
+        for (j = 0; j < nobjects; j++) {
+          X[i][j] = X[i][j] - averages[i];
+        }
+      }
+
+      //Here we just setup a covariance matrix full of
+      var covar = [];
+      for (i = 0; i < nvariables; i++) {
+        var tmp3 = [];
+        for (j = 0; j < nvariables; j++) {
+          tmp3.push(0);
+        }
+        covar.push(tmp3);
+      }
+      //This block fills in the covariance matrix by increasingly summing the products
+      for (i = 0; i < nvariables; i++) {
+        for (j = 0; j < nvariables; j++) {
+          for (k = 0; k < nobjects; k++) {
+            covar[i][j] = covar[i][j] + X[i][k] * X[j][k];
+          }
+          covar[i][j] = covar[i][j] / (nobjects - 1); //Here can be -0
+        }
+      }
+
+      var matrixforsvd = array2mat(covar);
+
+      var svdcalc = svd(matrixforsvd, "full");
+      console.log(svdcalc.U);
+      console.log(svdcalc.S);
+      console.log(svdcalc.V);
+      console.log(svdcalc.s);
+
+      var projection = [];
+      var pc1 = 0;
+      var pc2 = 0;
+      var U = svdcalc.U.toArray();
+
+      for (i = 0; i < nobjects; i++) {
+        pc1 = 0;
+        pc2 = 0;
+        for (j = 0; j < nvariables; j++) {
+          pc1 = pc1 + U[j][0] * X[j][i];
+          pc2 = pc2 + U[j][1] * X[j][i];
+        }
+        var tmp4 = [];
+        tmp4.push(pc1);
+        tmp4.push(pc2);
+        projection.push(tmp4);
+      }
+      //   document.write("Координата первой главной компоненты");
+      //   document.write("<br />");
+      //   document.write("<br />");
+      //   document.write(projection[0]);
+      //   document.write("<br />");
+      //   document.write("<br />");
+      //   document.write("Координата второй главной компоненты");
+      //   document.write("<br />");
+      //   document.write("<br />");
+      //   document.write(projection[1]);
+      //   document.write("<br />");
+      //   document.write("<br />");
+      //   document.write("Координата третьей главной компоненты");
+      //   document.write("<br />");
+      //   document.write("<br />");
+      //   document.write(projection[2]);
+
+      google.charts.load("current", { packages: ["corechart"] });
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ["Time", "Intensity"],
+          projection[0],
+          projection[1],
+          projection[2],
+        ]);
+
+        var options = {
+          hAxis: { title: "PC1", minValue: 10, maxValue: 25 },
+          vAxis: { title: "PC2", minValue: 5, maxValue: 20 },
+          legend: "none",
+        };
+
+        var chart = new google.visualization.ScatterChart(
+          document.getElementById("chart_div")
+        );
+
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+  <body>
+    <script type="application/x-javascript" src="lalolib.js"></script>
+    <div id="chart_div" style="width: 900px; height: 500px"></div>
+  </body>
+</html>
