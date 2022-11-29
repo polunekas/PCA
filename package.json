@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "csv-parse": "^5.3.2",
+    "csv-parser": "^3.0.0",
+    "csv-to-js-parser": "^2.3.5",
+    "fast-csv": "^4.3.6",
+    "ngx-papaparse": "^3.0.4",
+    "papaparse": "^5.3.2"
+  }
+}
